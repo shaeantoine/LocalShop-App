@@ -1,8 +1,7 @@
-"""
-URL configuration for localshop_backend project.
+"""ecommerce URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
+    https://docs.djangoproject.com/en/3.0/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -15,31 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-
-from django.urls import path #, include
-# from rest_framework.routers import DefaultRouter
-# from LocalShopApp.views import UserViewSet, ProductViewSet, OrderItemViewSet, OrderViewSet
-
-# router = DefaultRouter()
-# router.register(r'users', UserViewSet)
-# router.register(r'products', ProductViewSet)
-# router.register(r'orderitems', OrderItemViewSet)
-# router.register(r'orders', OrderViewSet)
-
-# urlpatterns = [
-#     path("admin/", admin.site.urls),
-#     path('', include(router.urls)),
-# ]
-
-from django.urls import path
-
-from LocalShopApp import views
+from django.urls import path, include
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
-        #Leave as empty string for base url
-	path('', views.localshop, name="localshop"),
-	path('cart/', views.cart, name="cart"),
-	path('checkout/', views.checkout, name="checkout"),
-
+    path('admin/', admin.site.urls),
+    path('', include('LocalShopApp.urls')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

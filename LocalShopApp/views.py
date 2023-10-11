@@ -3,6 +3,7 @@
 # from .models import User, Product, Order, OrderItem
 # from .serializers import UserSerializer, ProductSerializer, OrderSerializer, OrderItemSerializer
 from django.shortcuts import render
+from .models import * 
 
 ## Depreciated
 
@@ -42,11 +43,9 @@ from django.shortcuts import render
 #         serializer = OrderSerializer(queryset, many=True)
 #         return Response(serializer.data)
 
-
-
-
 def localshop(request):
-     context = {}
+     products = Product.objects.all()
+     context = {'products':products}
      return render(request, 'LocalShopApp/localshop.html', context)
 
 def cart(request):
