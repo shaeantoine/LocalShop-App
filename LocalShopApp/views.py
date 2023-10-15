@@ -2,12 +2,14 @@
 # from rest_framework.response import Response
 # from .models import User, Product, Order, OrderItem
 # from .serializers import UserSerializer, ProductSerializer, OrderSerializer, OrderItemSerializer
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import json
 import datetime
 from .models import * 
 from . utils import cookieCart, cartData, guestOrder
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponse
 
 ## Depreciated
 
@@ -155,3 +157,24 @@ def order_history(request):
 	order_items = OrderItem.objects.filter(order__in=orders)
 	context = {'orders': orders, 'order_items': order_items}
 	return render(request, 'LocalShopApp/orderhistory.html', context)
+
+
+from django.contrib import messages
+
+def user_login(request):
+    error_message = None
+    
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Successfully logged in.')
+            return redirect('localshop')  # Redirect to the main page after successful login
+        else:
+            error_message = "Invalid username or password. Please try again."
+            messages.error(request, error_message)
+    
+    return render(request, 'LocalShopApp/login.html', {'title': 'Login', 'error_message': error_message})

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     #"LocalShopApp",
     "LocalShopApp.apps.LocalshopappConfig", # Configure local shop app 
+
 ]
 
 MIDDLEWARE = [
@@ -123,3 +124,5 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/images/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
