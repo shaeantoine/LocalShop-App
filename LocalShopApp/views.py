@@ -9,7 +9,8 @@ import datetime
 from .models import * 
 from . utils import cookieCart, cartData, guestOrder
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+
 
 ## Depreciated
 
@@ -142,21 +143,23 @@ def processOrder(request):
 	return JsonResponse('Payment submitted..', safe=False)
 
 
-def order_history(request):
-    # if request.user.is_authenticated:
-    #     orders = Order.objects.filter(customer=request.user.customer, complete=True)
-    #     order_items = OrderItem.objects.filter(order__in=orders)
-    #     context = {'orders': orders, 'order_items': order_items}
-    #     return render(request, 'LocalShopApp/order_history.html', context)
-    # else:
-    #     # Handle the case where the user is not authenticated
-    #     # Redirect them to the login page or show an error message
-    #     pass
+# def order_history(request):
+# 	orders = Order.objects.all()
+# 	order_items = OrderItem.objects.filter(order__in=orders)
+# 	context = {'orders': orders, 'order_items': order_items}
+# 	return render(request, 'LocalShopApp/orderhistory.html', context)
 
-	orders = Order.objects.all()
-	order_items = OrderItem.objects.filter(order__in=orders)
-	context = {'orders': orders, 'order_items': order_items}
-	return render(request, 'LocalShopApp/orderhistory.html', context)
+@login_required
+def order_history(request):
+    if request.user.is_staff:  # Check if the user is an admin
+        orders = Order.objects.all()  # Show all orders for admins
+        order_items = OrderItem.objects.filter(order__in=orders)
+    else:
+        orders = Order.objects.filter(user=request.user)  # Show only user's orders for customers
+        order_items = OrderItem.objects.filter(order__in=orders)
+
+    context = {'orders': orders, 'order_items': order_items}
+    return render(request, 'LocalShopApp/order_history.html', context)
 
 
 from django.contrib import messages
