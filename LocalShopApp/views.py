@@ -138,3 +138,20 @@ def processOrder(request):
 		)
 
 	return JsonResponse('Payment submitted..', safe=False)
+
+
+def order_history(request):
+    # if request.user.is_authenticated:
+    #     orders = Order.objects.filter(customer=request.user.customer, complete=True)
+    #     order_items = OrderItem.objects.filter(order__in=orders)
+    #     context = {'orders': orders, 'order_items': order_items}
+    #     return render(request, 'LocalShopApp/order_history.html', context)
+    # else:
+    #     # Handle the case where the user is not authenticated
+    #     # Redirect them to the login page or show an error message
+    #     pass
+
+	orders = Order.objects.all()
+	order_items = OrderItem.objects.filter(order__in=orders)
+	context = {'orders': orders, 'order_items': order_items}
+	return render(request, 'LocalShopApp/orderhistory.html', context)
