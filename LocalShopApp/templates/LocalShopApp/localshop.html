@@ -1,6 +1,13 @@
 {% extends 'LocalShopApp/main.html' %}
 {% load static %}
 {% block content %}
+    <div class="search-bar">
+        <form method="get" action="{% url 'localshop' %}">
+            <input type="text" name="q" placeholder="Search products...">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
 	<div class="row">
 		{% for product in products %}
 		<div class="col-lg-4">
@@ -17,5 +24,4 @@
 		</div>
 		{% endfor %}
 	</div>
-
 {% endblock content %}

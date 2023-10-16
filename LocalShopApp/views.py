@@ -50,17 +50,34 @@ from django.contrib.auth.decorators import login_required
 #         serializer = OrderSerializer(queryset, many=True)
 #         return Response(serializer.data)
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 
 @csrf_exempt
 def localshop(request):
-	data = cartData(request)
-	cartItems = data['cartItems']
-	order = data['order']
-	items = data['items']
+    data = cartData(request)
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
 
-	products = Product.objects.all()
-	context = {'products':products, 'cartItems':cartItems}
-	return render(request, 'LocalShopApp/localshop.html', context)
+    query = request.GET.get('q')
+    if query:
+        products = Product.objects.filter(Q(name__icontains=query)) # | Q(description__icontains=query)
+    else:
+        products = Product.objects.all()
+
+    context = {'products': products, 'cartItems': cartItems}
+    return render(request, 'LocalShopApp/localshop.html', context)
+
+
+# def localshop(request):
+# 	data = cartData(request)
+# 	cartItems = data['cartItems']
+# 	order = data['order']
+# 	items = data['items']
+
+# 	products = Product.objects.all()
+# 	context = {'products':products, 'cartItems':cartItems}
+# 	return render(request, 'LocalShopApp/localshop.html', context)
 
 
 def cart(request):
