@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     #"LocalShopApp",
     "LocalShopApp.apps.LocalshopappConfig", # Configure local shop app 
+
 ]
 
 MIDDLEWARE = [
@@ -98,9 +99,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en-au"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "UTC" # Need to change to AEDT or UTC + 11
 
 USE_I18N = True
 
@@ -123,3 +124,5 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/images/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

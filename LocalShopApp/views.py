@@ -2,8 +2,15 @@
 # from rest_framework.response import Response
 # from .models import User, Product, Order, OrderItem
 # from .serializers import UserSerializer, ProductSerializer, OrderSerializer, OrderItemSerializer
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+import json
+import datetime
 from .models import * 
+from . utils import cookieCart, cartData, guestOrder
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+
 
 ## Depreciated
 
@@ -42,34 +49,135 @@ from .models import *
 #         queryset = Order.objects.all()
 #         serializer = OrderSerializer(queryset, many=True)
 #         return Response(serializer.data)
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def localshop(request):
-     products = Product.objects.all()
-     context = {'products':products}
-     return render(request, 'LocalShopApp/localshop.html', context)
+	data = cartData(request)
+	cartItems = data['cartItems']
+	order = data['order']
+	items = data['items']
+
+	products = Product.objects.all()
+	context = {'products':products, 'cartItems':cartItems}
+	return render(request, 'LocalShopApp/localshop.html', context)
+
 
 def cart(request):
+	data = cartData(request)
+	cartItems = data['cartItems']
+	order = data['order']
+	items = data['items']
 
-     if request.user.is_authenticated:
-          customer = request.user.customer
-          order, created = Order.objects.get_or_create(customer=customer, complete=False)
-          items = order.orderitem_set.all()
-     else:
-          items = []
-          order = {'get_cart_total':0, 'get_cart_items':0}
+	context = {'items':items, 'order':order, 'cartItems':cartItems}
+	return render(request, 'LocalShopApp/cart.html', context)
 
-     context = {'items':items, 'order':order}
-     return render(request, 'LocalShopApp/cart.html', context)
 
 def checkout(request):
-      
-     if request.user.is_authenticated:
-          customer = request.user.customer
-          order, created = Order.objects.get_or_create(customer=customer, complete=False)
-          items = order.orderitem_set.all()
-     else:
-          items = []
-          order = {'get_cart_total':0, 'get_cart_items':0}
+	data = cartData(request)
+	cartItems = data['cartItems']
+	order = data['order']
+	items = data['items']
 
-     context = {'items':items, 'order':order}
-     return render(request, 'LocalShopApp/checkout.html', context)
+	context = {'items':items, 'order':order, 'cartItems':cartItems}
+	return render(request, 'LocalShopApp/checkout.html', context)
+
+
+
+def updateItem(request):
+  data = json.loads(request.data)
+  productId = data['productId']
+  action = data['action']
+
+  print('productId', productId)
+  print('Action;', action)
+
+  customer = request.user.customer
+  product = Product.objects.get(id=productId)
+  order, created = Order.objects.get_or_create(customer=customer, complete=False)
+  orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
+
+  if action == 'add':
+    orderItem.quantity = (orderItem.quantity + 1)
+  elif action == 'remove':
+    orderItem.quantity = (orderItem.quantity - 1)
+  
+  orderItem.save()
+
+  if orderItem.quantity <= 0:
+    orderItem.delete()
+
+  return JsonResponse('Item was added', safe=False)
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def processOrder(request):
+	transaction_id = datetime.datetime.now().timestamp()
+	data = json.loads(request.body)
+
+	if request.user.is_authenticated:
+		customer = request.user.customer
+		order, created = Order.objects.get_or_create(customer=customer, complete=False)
+	else:
+		customer, order = guestOrder(request, data)
+
+	total = float(data['form']['total'])
+	order.transaction_id = transaction_id
+
+	if total == order.get_cart_total:
+		order.complete = True
+	order.save()
+
+	if order.shipping == True:
+		ShippingAddress.objects.create(
+		customer=customer,
+		order=order,
+		address=data['shipping']['address'],
+		city=data['shipping']['city'],
+		state=data['shipping']['state'],
+		zipcode=data['shipping']['zipcode'],
+		)
+
+	return JsonResponse('Payment submitted..', safe=False)
+
+
+# def order_history(request):
+# 	orders = Order.objects.all()
+# 	order_items = OrderItem.objects.filter(order__in=orders)
+# 	context = {'orders': orders, 'order_items': order_items}
+# 	return render(request, 'LocalShopApp/orderhistory.html', context)
+
+@login_required
+def order_history(request):
+    if request.user.is_staff:  # Check if the user is an admin
+        orders = Order.objects.all()  # Show all orders for admins
+        order_items = OrderItem.objects.filter(order__in=orders)
+    else:
+        orders = Order.objects.filter(user=request.user)  # Show only user's orders for customers
+        order_items = OrderItem.objects.filter(order__in=orders)
+
+    context = {'orders': orders, 'order_items': order_items}
+    return render(request, 'LocalShopApp/order_history.html', context)
+
+
+from django.contrib import messages
+
+def user_login(request):
+    error_message = None
+    
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Successfully logged in.')
+            return redirect('localshop')  # Redirect to the main page after successful login
+        else:
+            error_message = "Invalid username or password. Please try again."
+            messages.error(request, error_message)
+    
+    return render(request, 'LocalShopApp/login.html', {'title': 'Login', 'error_message': error_message})
