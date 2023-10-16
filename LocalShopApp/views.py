@@ -60,10 +60,24 @@ def localshop(request):
     items = data['items']
 
     query = request.GET.get('q')
+    category = request.GET.get('category')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    # Apply search query, category, and price range filters
+    products = Product.objects.all()
+
     if query:
-        products = Product.objects.filter(Q(name__icontains=query)) # | Q(description__icontains=query)
-    else:
-        products = Product.objects.all()
+        products = products.filter(Q(name__icontains=query)) #| Q(description__icontains=query)
+
+    if category:
+        products = products.filter(category=category)
+
+    if min_price:
+        products = products.filter(price__gte=min_price)
+
+    if max_price:
+        products = products.filter(price__lte=max_price)
 
     context = {'products': products, 'cartItems': cartItems}
     return render(request, 'LocalShopApp/localshop.html', context)

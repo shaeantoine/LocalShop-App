@@ -1,12 +1,31 @@
 {% extends 'LocalShopApp/main.html' %}
 {% load static %}
 {% block content %}
-    <div class="search-bar">
-        <form method="get" action="{% url 'localshop' %}">
-            <input type="text" name="q" placeholder="Search products...">
-            <button type="submit">Search</button>
-        </form>
-    </div>
+	<form method="get" action="{% url 'localshop' %}">
+		<div class="form-row">
+			<div class="col">
+				<input type="text" name="q" class="form-control" placeholder="Search products...">
+			</div>
+			<div class="col">
+				<select name="category" class="form-control">
+					<option value="">All Categories</option>
+					<option value="Phone">Phone</option>
+					<option value="Audio">Audio</option>
+					<option value="Accessory">Accessory</option>
+					<option value="Wearable">Wearable</option>
+				</select>
+			</div>
+			<div class="col">
+				<input type="number" name="min_price" class="form-control" placeholder="Min Price">
+			</div>
+			<div class="col">
+				<input type="number" name="max_price" class="form-control" placeholder="Max Price">
+			</div>
+			<div class="col">
+				<button type="submit" class="btn btn-primary">Filter</button>
+			</div>
+		</div>
+	</form>
 
 	<div class="row">
 		{% for product in products %}
@@ -25,3 +44,4 @@
 		{% endfor %}
 	</div>
 {% endblock content %}
+
