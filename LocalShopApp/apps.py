@@ -3,3 +3,6 @@ from django.apps import AppConfig
 class LocalshopappConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "LocalShopApp"
+
+    def ready(self):
+        import LocalShopApp.signals  # Import your signals module here

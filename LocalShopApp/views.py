@@ -186,7 +186,8 @@ def order_history(request):
         orders = Order.objects.all()  # Show all orders for admins
         order_items = OrderItem.objects.filter(order__in=orders)
     else:
-        orders = Order.objects.filter(user=request.user)  # Show only user's orders for customers
+        customer = request.user.customer  # Get the customer associated with the logged-in user
+        orders = Order.objects.filter(customer=customer) 
         order_items = OrderItem.objects.filter(order__in=orders)
 
     context = {'orders': orders, 'order_items': order_items}
@@ -212,3 +213,18 @@ def user_login(request):
             messages.error(request, error_message)
     
     return render(request, 'LocalShopApp/login.html', {'title': 'Login', 'error_message': error_message})
+
+
+from .forms import RegistrationForm
+
+def user_register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account created successfully. Please log in.')
+            return redirect('login')
+    else:
+        form = RegistrationForm()
+
+    return render(request, 'LocalShopApp/register.html', {'title': 'Register', 'form': form})

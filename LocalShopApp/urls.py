@@ -12,5 +12,6 @@ urlpatterns = [
 	path('process_order/', views.processOrder, name="process_order"),
     path('orders/', views.order_history, name='order_history'),
     path('login/', views.user_login, name='login'),
+    path('register/', views.user_register, name='register'),
 
 ]
