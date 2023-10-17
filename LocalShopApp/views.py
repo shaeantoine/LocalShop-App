@@ -8,7 +8,7 @@ import json
 import datetime
 from .models import * 
 from . utils import cookieCart, cartData, guestOrder
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 
@@ -237,3 +237,7 @@ def user_register(request):
         form = RegistrationForm()
 
     return render(request, 'LocalShopApp/register.html', {'title': 'Register', 'form': form})
+
+def user_logout(request):
+    logout(request)
+    return redirect('localshop')  # Redirect to the main page after logout
