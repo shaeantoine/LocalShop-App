@@ -151,8 +151,17 @@ def processOrder(request):
 	if request.user.is_authenticated:
 		customer = request.user.customer
 		order, created = Order.objects.get_or_create(customer=customer, complete=False)
+		#order = Order.objects.create(customer=customer, complete=False, transaction_id=transaction_id)
 	else:
 		customer, order = guestOrder(request, data)
+
+	# if request.user.is_authenticated:
+	# 	customer = request.user.customer
+	# else:
+	# 	customer, _ = guestOrder(request, data)
+
+    # # Create a new order for the customer each time
+	# order = Order.objects.create(customer=customer, complete=False, transaction_id=transaction_id)
 
 	total = float(data['form']['total'])
 	order.transaction_id = transaction_id

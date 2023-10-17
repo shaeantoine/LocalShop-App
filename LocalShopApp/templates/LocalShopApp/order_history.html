@@ -21,7 +21,7 @@
                     <td>{{ order.id }}</td>
                     <td>{{ order.date_ordered }}</td>
                     <td>${{ order.get_cart_total|floatformat:2 }}</td>
-                    <td>{{ order.complete }}</td>
+                    <td>{{ order.status }}</td>
                     <td>
                         <button class="btn btn-info toggle-details-btn" data-order-id="{{ order.id }}">Show Details</button>
                     </td>
